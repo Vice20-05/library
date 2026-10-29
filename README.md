@@ -129,3 +129,7 @@ interface with its three implementations, and the composition between `Konyvtar`
 
 - Auto-save every 5 minutes
 - Swing UI with JTable
+
+## Note
+
+Claude only checked if the folders have README and gitignore and pushed them so all of them are pushed
