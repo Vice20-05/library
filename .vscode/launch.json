@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Library (CSV)",
+            "request": "launch",
+            "mainClass": "Main",
+            "args": "csv",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "java",
+            "name": "Library (serialization)",
+            "request": "launch",
+            "mainClass": "Main",
+            "args": "ser",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "java",
+            "name": "Library (JSON)",
+            "request": "launch",
+            "mainClass": "Main",
+            "args": "json",
+            "console": "integratedTerminal"
+        }
+    ]
+}

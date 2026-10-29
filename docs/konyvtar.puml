@@ -1,0 +1,114 @@
+@startuml
+' Könyvtári rendszer - class diagram
+' The KonyvtarTar interface and its implementations are in the middle.
+
+skinparam packageStyle rectangle
+
+package model {
+  class Konyvtar <<Serializable>> {
+    - konyvek : List<Konyv>
+    - olvasok : List<Olvaso>
+    - kolcsonzesek : List<Kolcsonzes>
+    + addKonyv(k : Konyv)
+    + addOlvaso(o : Olvaso)
+    + addKolcsonzes(k : Kolcsonzes)
+    + findKonyv(isbn : String) : Optional<Konyv>
+    + findOlvaso(jegy : String) : Optional<Olvaso>
+    + keres(reszlet : String) : List<Konyv>
+    + rendezveCimSzerint() : List<Konyv>
+    + rendezveEvSzerint() : List<Konyv>
+    + szabadPeldany(k : Konyv) : int
+    + kolcsonoz(isbn, jegy, datum : LocalDate) : Kolcsonzes
+    + visszahoz(isbn, jegy, ma : LocalDate) : long
+  }
+
+  class Konyv <<Serializable>> {
+    + {static} CIM_SZERINT : Comparator<Konyv>
+    + {static} EV_SZERINT : Comparator<Konyv>
+    - isbn : String {final}
+    - cim : String
+    - szerzo : String
+    - kiadasEve : int
+    - peldanyszam : int
+    + equals(o) : boolean  // ISBN
+    + hashCode() : int
+    + toString() : String
+  }
+
+  class Olvaso <<Serializable>> {
+    - olvasojegySzam : String {final}
+    - nev : String
+    + equals(o) : boolean  // card number
+    + hashCode() : int
+    + toString() : String
+  }
+
+  class Kolcsonzes <<Serializable>> {
+    + {static} KOLCSONZESI_IDO_NAP = 14
+    + {static} NAPI_DIJ = 100
+    - konyv : Konyv
+    - olvaso : Olvaso
+    - datum : LocalDate
+    - hatarido : LocalDate
+    + kesesNapok(ma : LocalDate) : long
+    + kesedelmiDij(ma : LocalDate) : long
+  }
+}
+
+package tar {
+  interface KonyvtarTar {
+    + ment(k : Konyvtar, fajl : Path) <<throws IOException>>
+    + betolt(fajl : Path) : Konyvtar <<throws IOException>>
+  }
+
+  class SzerializaltTar {
+    ObjectOutputStream / ObjectInputStream
+  }
+  class CsvTar {
+    BufferedWriter / BufferedReader
+    ~ {static} FEJLEC : String
+    ~ {static} vedes(s : String) : String
+    ~ {static} feldarabol(sor : String) : List<String>
+  }
+  class JsonTar <<stretch>> {
+    Gson JsonObject / JsonArray
+  }
+
+  class BiztonsagosMentes <<utility>> {
+    + {static} ideiglenesFajl(fajl : Path) : Path
+    + {static} csere(tmp : Path, fajl : Path)  // ATOMIC_MOVE
+    + {static} takarit(tmp : Path)
+  }
+
+  class SerultFajlKivetel
+  IOException <|-- SerultFajlKivetel
+}
+
+class Main {
+  + {static} main(args : String[])
+}
+
+' composition: the library owns its lists
+Konyvtar "1" *-- "0..*" Konyv
+Konyvtar "1" *-- "0..*" Olvaso
+Konyvtar "1" *-- "0..*" Kolcsonzes
+
+' a loan points to exactly one book and one reader
+Kolcsonzes "0..*" --> "1" Konyv
+Kolcsonzes "0..*" --> "1" Olvaso
+
+' the three implementations of the common interface
+KonyvtarTar <|.. SzerializaltTar
+KonyvtarTar <|.. CsvTar
+KonyvtarTar <|.. JsonTar
+
+SzerializaltTar ..> BiztonsagosMentes
+CsvTar ..> BiztonsagosMentes
+JsonTar ..> BiztonsagosMentes
+KonyvtarTar ..> Konyvtar
+KonyvtarTar ..> SerultFajlKivetel : throws
+
+' Main only uses the interface (chooses the implementation once)
+Main --> KonyvtarTar
+Main ..> Konyvtar
+@enduml

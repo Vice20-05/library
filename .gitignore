@@ -1,0 +1,7 @@
+out/
+out_test/
+*.tmp
+*.hibas
+/konyvtar.csv
+/konyvtar.ser
+/konyvtar.json
